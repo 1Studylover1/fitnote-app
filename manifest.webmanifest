@@ -1,0 +1,38 @@
+{
+  "id": "./",
+  "name": "FitNote · 好好吃饭，好好生活",
+  "short_name": "FitNote",
+  "description": "可爱轻松的健身、饮食、身体档案与恢复记录工具。",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8f8f2",
+  "theme_color": "#f8f8f2",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": [
+    "health",
+    "lifestyle",
+    "fitness"
+  ]
+}
