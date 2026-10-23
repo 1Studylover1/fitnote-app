@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="FitNote">
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
 <title>FitNote · 好好吃饭，好好生活</title>
 <style>
 :root{
@@ -58,13 +58,18 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-vis
 }
 @media(display-mode:standalone){.install-btn{background:#f6f4ed}}
 
+
+.photo-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:3px}
+.photo-actions button{min-height:40px;font-size:12px}
+.body-history-photo{width:46px;height:46px;object-fit:cover;border-radius:12px;display:block}
+
 </style>
 </head>
 <body>
 <div class="app">
 <header class="topbar">
   <div class="brand">
-    <div class="brand-mark"><img src="./icons/icon-192.png" alt="FitNote 小豹子图标"></div>
+    <div class="brand-mark"><img src="./icon-192.png" alt="FitNote 小豹子图标"></div>
     <div><h1>FitNote <span style="color:#8c9a83;font-weight:550">· 好好吃饭，好好生活</span></h1><p>Little steps, lovely progress ✨</p></div>
   </div>
   <div class="top-actions">
@@ -281,7 +286,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-vis
   </div>
   <div class="profile-grid" style="margin-top:15px">
     <section class="panel">
-      <div class="panel-head"><div><h3>📏 记录身体维度</h3><p class="panel-sub">体重、腰围、臀围等按日期保存。</p></div></div>
+      <div class="panel-head"><div><h3>📏 记录身体信息</h3><p class="panel-sub">可以手动填写体重和围度，也可以拍照或上传体测报告、身体照片留档。</p></div></div>
       <form id="bodyForm">
         <div class="form-grid">
           <div class="field"><label for="bodyDate">记录日期</label><input id="bodyDate" type="date" required></div>
@@ -293,7 +298,18 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-vis
           <div class="field"><label for="bodyThigh">大腿围 (cm)</label><input id="bodyThigh" type="number" min="0" step="0.1" placeholder="可选"></div>
           <div class="field"><label for="bodyArm">上臂围 (cm)</label><input id="bodyArm" type="number" min="0" step="0.1" placeholder="可选"></div>
           <div class="field"><label for="bodyCalf">小腿围 (cm)</label><input id="bodyCalf" type="number" min="0" step="0.1" placeholder="可选"></div>
-          <div class="field full"><label for="bodyPhoto">身体照片（可选）</label><input id="bodyPhoto" type="file" accept="image/*" capture="environment"><img id="bodyPhotoPreview" class="photo-preview hidden" alt="身体照片预览"></div><div class="field full"><label for="bodyNote">备注</label><input id="bodyNote" placeholder="例如：晨起测量"></div>
+          <div class="field full">
+            <label>图片录入（可选）</label>
+            <p class="help">可以拍摄体测报告、身体成分报告或身体照片，也可以从相册/文件中选择。图片会附在本条身体记录中，仅保存在当前浏览器。</p>
+            <div class="photo-actions">
+              <button type="button" class="secondary" id="bodyPhotoTakeBtn">📷 拍照</button>
+              <button type="button" class="secondary" id="bodyPhotoUploadBtn">🖼️ 从相册 / 文件上传</button>
+              <button type="button" class="secondary hidden" id="bodyPhotoRemoveBtn">移除图片</button>
+            </div>
+            <input id="bodyPhotoCamera" class="hidden" type="file" accept="image/*" capture="environment">
+            <input id="bodyPhotoUpload" class="hidden" type="file" accept="image/*">
+            <img id="bodyPhotoPreview" class="photo-preview hidden" alt="身体记录图片预览">
+          </div><div class="field full"><label for="bodyNote">备注</label><input id="bodyNote" placeholder="例如：晨起测量"></div>
         </div>
         <div class="form-actions"><button type="submit" class="primary">保存身体记录</button></div>
       </form>
@@ -309,7 +325,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-vis
     <p class="small muted" style="margin-top:12px">第一版不需要账号或服务器，不会自动跨设备同步。导入备份会替换当前数据；操作前请先导出。</p>
   </section>
 </section>
-<footer class="footer"><span>FitNote 🌷 · 好好吃饭，好好生活</span><span>第二版网页原型 · 新增零食 / 大餐记录、身体照片上传 · 本地保存 · 不调用 GPT API</span></footer>
+<footer class="footer"><span>FitNote 🌷 · 好好吃饭，好好生活</span><span>身体图片录入更新版 · 支持拍照 / 相册上传体测报告或身体照片 · 本地保存 · 不调用 GPT API</span></footer>
 </div>
 
 <div class="modal-backdrop" id="foodModalBackdrop">
@@ -503,11 +519,17 @@ function renderCalcPreview(){const b=bmr(),t=baseTdee(selectedDate);$('bmrResult
 $('goalsForm').addEventListener('submit',e=>{e.preventDefault();data.goals={goalType:$('goalType').value,targetMode:$('targetMode').value,manualCalories:n($('manualCalories').value),protein:n($('goalProtein').value),carbs:n($('goalCarbs').value),fat:n($('goalFat').value),water:n($('goalWater').value),deficit:n($('goalDeficit').value),surplus:n($('goalSurplus').value),cycleAdjustEnabled:$('cycleAdjustEnabled').checked,cycleDefaultExtra:n($('cycleDefaultExtra').value)};save();renderAll();toast('目标设置已保存 🌼')});
 $('profileForm').addEventListener('submit',e=>{e.preventDefault();data.profile={name:$('profileName').value.trim(),sex:$('profileSex').value,age:$('profileAge').value===''?'':n($('profileAge').value),height:$('profileHeight').value===''?'':n($('profileHeight').value),weight:$('profileWeight').value===''?'':n($('profileWeight').value),activityFactor:n($('activityFactor').value),energyMode:$('energyMode').value};save();renderAll();toast('身体档案保存成功 💗')});
 ['profileSex','profileAge','profileHeight','profileWeight','activityFactor','energyMode','goalType','targetMode','manualCalories','goalDeficit','goalSurplus','cycleDefaultExtra','cycleAdjustEnabled'].forEach(id=>$(id).addEventListener('input',renderCalcPreview));
-function renderBodyHistory(){const arr=data.bodyLogs.slice().sort((a,b)=>b.date.localeCompare(a.date));$('bodyCount').textContent=arr.length+' 条';$('bodyHistoryList').innerHTML=arr.length?arr.map(x=>{const bits=[];if(x.weight!=='')bits.push('体重 '+fmt(x.weight,1)+' kg');if(x.fat!=='')bits.push('体脂 '+fmt(x.fat,1)+'%');[['waist','腰围'],['hip','臀围'],['chest','胸围'],['thigh','大腿'],['arm','上臂'],['calf','小腿']].forEach(([k,l])=>{if(x[k]!=='')bits.push(l+' '+fmt(x[k],1)+' cm')});return `<div class="entry"><div class="entry-emoji">📏</div><div class="entry-main"><strong>${esc(dateLabel(x.date))}</strong><small>${esc(bits.join(' · ')||'已保存身体记录')}${x.note?' · '+esc(x.note):''}</small></div><button class="delete" data-delete="body:${esc(x.id)}" title="删除">×</button></div>`}).join(''):empty('记录几次身体数据后，就能在这里回顾变化。','📐')}
+function renderBodyHistory(){const arr=data.bodyLogs.slice().sort((a,b)=>b.date.localeCompare(a.date));$('bodyCount').textContent=arr.length+' 条';$('bodyHistoryList').innerHTML=arr.length?arr.map(x=>{const bits=[];if(x.weight!=='')bits.push('体重 '+fmt(x.weight,1)+' kg');if(x.fat!=='')bits.push('体脂 '+fmt(x.fat,1)+'%');[['waist','腰围'],['hip','臀围'],['chest','胸围'],['thigh','大腿'],['arm','上臂'],['calf','小腿']].forEach(([k,l])=>{if(x[k]!=='')bits.push(l+' '+fmt(x[k],1)+' cm')});return `<div class="entry"><div class="entry-emoji">${x.photo?`<img class="body-history-photo" src="${x.photo}" alt="身体记录图片">`:'📏'}</div><div class="entry-main"><strong>${esc(dateLabel(x.date))}</strong><small>${esc(bits.join(' · ')||(x.photo?'已保存图片记录':'已保存身体记录'))}${x.note?' · '+esc(x.note):''}</small></div><button class="delete" data-delete="body:${esc(x.id)}" title="删除">×</button></div>`}).join(''):empty('记录几次身体数据后，就能在这里回顾变化。','📐')}
 
-$('bodyPhoto').addEventListener('change',async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{bodyPhotoData=await compressImage(file);$('bodyPhotoPreview').src=bodyPhotoData;$('bodyPhotoPreview').classList.remove('hidden')}catch(err){toast('身体照片读取失败，请重试')}})
+function resetBodyPhoto(){bodyPhotoData='';$('bodyPhotoCamera').value='';$('bodyPhotoUpload').value='';$('bodyPhotoPreview').src='';$('bodyPhotoPreview').classList.add('hidden');$('bodyPhotoRemoveBtn').classList.add('hidden')}
+async function readBodyPhoto(file){if(!file)return;try{bodyPhotoData=await compressImage(file);$('bodyPhotoPreview').src=bodyPhotoData;$('bodyPhotoPreview').classList.remove('hidden');$('bodyPhotoRemoveBtn').classList.remove('hidden')}catch(err){toast('图片读取失败，请换一张图片重试')}}
+$('bodyPhotoTakeBtn').addEventListener('click',()=>$('bodyPhotoCamera').click());
+$('bodyPhotoUploadBtn').addEventListener('click',()=>$('bodyPhotoUpload').click());
+$('bodyPhotoCamera').addEventListener('change',e=>readBodyPhoto(e.target.files&&e.target.files[0]));
+$('bodyPhotoUpload').addEventListener('change',e=>readBodyPhoto(e.target.files&&e.target.files[0]));
+$('bodyPhotoRemoveBtn').addEventListener('click',resetBodyPhoto);
 
-$('bodyForm').addEventListener('submit',e=>{e.preventDefault();const keys=['bodyWeight','bodyFat','bodyWaist','bodyHip','bodyChest','bodyThigh','bodyArm','bodyCalf'];const vals=keys.map(k=>$(k).value);if(vals.every(v=>v===''))return toast('至少填写一项身体数据');const x={id:uid(),date:$('bodyDate').value||selectedDate,weight:vals[0]===''?'':n(vals[0]),fat:vals[1]===''?'':n(vals[1]),waist:vals[2]===''?'':n(vals[2]),hip:vals[3]===''?'':n(vals[3]),chest:vals[4]===''?'':n(vals[4]),thigh:vals[5]===''?'':n(vals[5]),arm:vals[6]===''?'':n(vals[6]),calf:vals[7]===''?'':n(vals[7]),note:$('bodyNote').value.trim()};data.bodyLogs.push(x);if(x.weight!=='')data.profile.weight=x.weight;save();e.target.reset();$('bodyDate').value=selectedDate;renderAll();toast('身体数据保存成功，继续温柔地观察自己 🌷')});
+$('bodyForm').addEventListener('submit',e=>{e.preventDefault();const keys=['bodyWeight','bodyFat','bodyWaist','bodyHip','bodyChest','bodyThigh','bodyArm','bodyCalf'];const vals=keys.map(k=>$(k).value);const note=$('bodyNote').value.trim();if(vals.every(v=>v==='')&&!bodyPhotoData&&!note)return toast('请填写身体数据、备注，或添加一张图片');const x={id:uid(),date:$('bodyDate').value||selectedDate,weight:vals[0]===''?'':n(vals[0]),fat:vals[1]===''?'':n(vals[1]),waist:vals[2]===''?'':n(vals[2]),hip:vals[3]===''?'':n(vals[3]),chest:vals[4]===''?'':n(vals[4]),thigh:vals[5]===''?'':n(vals[5]),arm:vals[6]===''?'':n(vals[6]),calf:vals[7]===''?'':n(vals[7]),note:note,photo:bodyPhotoData||''};data.bodyLogs.push(x);if(x.weight!=='')data.profile.weight=x.weight;save();e.target.reset();resetBodyPhoto();$('bodyDate').value=selectedDate;renderAll();toast('身体记录已保存 🌷')});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-log-food]');if(b)openFoodModal(b.dataset.logFood);const del=e.target.closest('[data-delete]');if(del){const [type,id]=del.dataset.delete.split(':');if(!confirm('确定删除这条记录吗？'))return;if(type==='food')data.foodLogs=data.foodLogs.filter(x=>x.id!==id);if(type==='workout')data.workouts=data.workouts.filter(x=>x.id!==id);if(type==='body')data.bodyLogs=data.bodyLogs.filter(x=>x.id!==id);save();renderAll();toast('已删除这条记录')}})
 function renderAll(){syncDates();renderHome();renderFoodLibrary();renderFoodLogs();renderWorkouts();renderHealthForm();renderGoalsForm();renderProfileForm();renderBodyHistory();renderCalendar();$('quickDate').value=selectedDate;$('bodyDate').value=selectedDate}
 function exportData(){const blob=new Blob([JSON.stringify({app:'FitNote',version:1,exportedAt:new Date().toISOString(),...data},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`FitNote-backup-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('备份文件已导出 📦')}
@@ -521,7 +543,7 @@ renderAll();
 <div class="install-overlay" id="installModal" role="dialog" aria-modal="true" aria-labelledby="installTitle">
   <div class="install-sheet">
     <div class="install-sheet-head">
-      <img src="./icons/icon-192.png" alt="FitNote 小豹子图标">
+      <img src="./icon-192.png" alt="FitNote 小豹子图标">
       <div><h3 id="installTitle">把 FitNote 放到桌面 🐆</h3><p id="installIntro">以后点一下图标就能打开。</p></div>
     </div>
     <p id="installPlatformText">按你的手机系统选择下面的步骤。</p>
